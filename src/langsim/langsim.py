@@ -9,6 +9,7 @@ __location__ = os.path.dirname(os.path.realpath(__file__))
 
 # FIXME: consider having a Language class here.
 
+
 class Language:
 
     # each language has: ISO639-1 code, ISO639-3 code, wikipedia code, wikipedia name,
@@ -17,7 +18,20 @@ class Language:
     # script data
     # wikipedia file size
     #
-    pass
+
+    def __init__(self, iso3code):
+        self.iso3 = iso3code
+        self.iso1 = None
+        self.wikicode = None
+        self.wikiname = None
+        self.wikisize = None
+        self.wals_vec = None
+        self.phoible_set = None
+        self.scriptdist = None
+
+    def __repr__(self):
+        return "L:" + self.iso3
+
 
 def getlangmap():
     """
