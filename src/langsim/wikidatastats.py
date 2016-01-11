@@ -140,6 +140,10 @@ def countscripts(sizes,langdists):
             
 
 def makedump(mypath):
+    """
+    This collects and dumps information about every wikidata file.
+    """
+    
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
 
     def filtering(f):
@@ -149,21 +153,23 @@ def makedump(mypath):
 
     print "There are {0} data files in this directory.".format(len(onlyfiles))
 
-    sizes = []
     langdists = {}
 
     ignore = set(string.punctuation + string.whitespace + string.digits)
 
-    print onlyfiles
-    
     for fname in onlyfiles:
 
-        langsim.Language(
-        
         with open(os.path.join(mypath, fname)) as f:
             lines = f.readlines()
-            sizes.append((len(lines),fname))
 
+            lang = langsim.Language()
+
+            header = lines[0].strip("#").strip().split("\t")
+            
+            lang.wikisize = len(lines)
+            lang.wikiname = header[0]
+            lang.wikicode = header[1]
+            
             charfreqs = defaultdict(int)
 
             for line in lines:
@@ -173,12 +179,10 @@ def makedump(mypath):
                     if char not in ignore:
                         char = char.lower()
                         charfreqs[char] += 1
-                    
-            langdists[fname] = charfreqs
-                        
-    sizes = sorted(sizes,reverse=True)
 
-    # should this be "wb"?
+            lang.charfreqs = charfreqs
+            langdists[lang.wikicode] = lang
+                        
     with open("wikilanguages.pkl", "wb") as f:
         pickle.dump(langdists, f)
 

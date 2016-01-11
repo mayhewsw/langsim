@@ -7,9 +7,6 @@ import wikidatastats
 import os.path
 __location__ = os.path.dirname(os.path.realpath(__file__))
 
-# FIXME: consider having a Language class here.
-
-
 class Language:
 
     # each language has: ISO639-1 code, ISO639-3 code, wikipedia code, wikipedia name,
@@ -19,18 +16,21 @@ class Language:
     # wikipedia file size
     #
 
-    def __init__(self, iso3code):
-        self.iso3 = iso3code
+    def __init__(self):
+        self.iso3 = None
         self.iso1 = None
         self.wikicode = None
         self.wikiname = None
         self.wikisize = None
         self.wals_vec = None
         self.phoible_set = None
-        self.scriptdist = None
+        self.charfreqs = None
 
     def __repr__(self):
-        return "L:" + self.iso3
+        if self.iso3:
+            return "L:" + self.iso3
+        else:
+            return "L:?"
 
 
 def getlangmap():
