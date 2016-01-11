@@ -153,9 +153,14 @@ def makedump(mypath):
     langdists = {}
 
     ignore = set(string.punctuation + string.whitespace + string.digits)
+
+    print onlyfiles
     
     for fname in onlyfiles:
-        with open(fname) as f:
+
+        langsim.Language(
+        
+        with open(os.path.join(mypath, fname)) as f:
             lines = f.readlines()
             sizes.append((len(lines),fname))
 
@@ -174,8 +179,8 @@ def makedump(mypath):
     sizes = sorted(sizes,reverse=True)
 
     # should this be "wb"?
-    with open("sizes-langdists.pkl", "w") as f:
-        pickle.dump(sizes, langdists, f)
+    with open("wikilanguages.pkl", "wb") as f:
+        pickle.dump(langdists, f)
 
 
 def loaddump():
