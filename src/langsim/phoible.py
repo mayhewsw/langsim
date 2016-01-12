@@ -2,7 +2,7 @@ from collections import defaultdict
 from scipy.spatial.distance import cosine
 import os
 import codecs
-import langsim
+import utils
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -45,12 +45,8 @@ def loadlangs():
 
     fname = os.path.join(__location__, "data/phoibledata/phoible-phonemes.tsv")
 
-    # This maps: {langcode : set(Phonemes...), ...}
-    langs = defaultdict(set)
-
-    # This maps {langcode : langname, ...}
-    # For example, kor : Korean
-    code2name = {}
+    # This maps: {langcode : Language(...), ...}
+    langs = {}
 
     with codecs.open(fname, "r", "utf-8") as p:
 
@@ -74,20 +70,26 @@ def loadlangs():
             trump = sline[4]
             if trump != "1":
                 continue
-            
-            code2name[langcode] = sline[3]
+
+            if langcode in langs:
+                lang = langs[langcode]
+            else:
+                lang = utils.Language()
 
             p = Phoneme(*sline[-6:])
 
-            langs[langcode].add(p)
+            lang.phoible_set.add(p)
+            lang.iso3 = langcode
+            lang.name = sline[3]
+
+            langs[langcode] = lang
             
-    return langs, code2name
+    return langs
 
 
 def loadlangdata():
     """
     This loads the file called phoible-aggregated.tsv. This has language data on each language.
-    Use the code2name structure to map langcode back to langname.
     :param fname: this is the file typically called gold-standard/phoible-aggregated.tsv
     :return: a map from {langcode : {lang features}, ...}
     """
@@ -106,7 +108,7 @@ def loadlangdata():
     return outdct
                 
 
-def getclosest(query, langs, code2name, only_hr=False, topk=100000):
+def getclosest(query, langs, only_hr=False, topk=100000):
     """
 
     :param query: a langcode
@@ -118,11 +120,11 @@ def getclosest(query, langs, code2name, only_hr=False, topk=100000):
     # this is a set of phonemes
     orig = langs[query]
 
-    hrlangs = langsim.get_hr_languages()
+    hrlangs = utils.get_hr_languages()
 
     pmap = readfeaturefile()
 
-    dists = []
+    sims = {}
 
     for langid in sorted(langs.keys(), reverse=True):
 
@@ -132,17 +134,13 @@ def getclosest(query, langs, code2name, only_hr=False, topk=100000):
             # try getting F1 here instead of just intersection.
             tgt = langs[langid]
 
-            score = getF1(orig, tgt)
+            score = getF1(orig.phoible_set, tgt.phoible_set)
             #score = getDistinctiveFeatures(orig, tgt, pmap)
             #score = getOV(tgt, orig, langs["eng"])
 
-            langdct = {"phonscore" : score, "langid":langid}
+            sims[langid] = score
 
-            dists.append(langdct)
-
-    ret = sorted(dists, key=lambda p: p["phonscore"], reverse=True)[:topk]
-
-    return ret
+    return sims
 
 
 def compare(l1, l2, langs):
@@ -163,7 +161,7 @@ def comparephonemes(l1, l2):
     :return: None
     """
 
-    langs, code2name = loadlangs()
+    langs = loadlangs()
 
     l1set = langs[l1]
     l2set = langs[l2]
@@ -330,21 +328,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.getclosest:
-        print "lang: ", args.langsim
-        langs, code2name = loadlangs()
-        print getclosest(args.langsim[0], langs, code2name, only_hr=args.highresource, topk = 10)
+        print "lang: ", args.getclosest
+        langs = loadlangs()
+        print getclosest(args.getclosest[0], langs, only_hr=args.highresource, topk = 10)
     elif args.getF1:
         print "langs: ", args.getF1
-        langs, code2name = loadlangs()
+        langs = loadlangs()
         print getF1(langs[args.getF1[0]], langs[args.getF1[1]])
     elif args.getDF:
         print "langs: ", args.getDF
-        langs, code2name = loadlangs()
+        langs = loadlangs()
         pmap = readfeaturefile()
         print getdistinctivefeatures(langs[args.getDF[0]], langs[args.getDF[1]], pmap)
     elif args.getOV:
         print "langs: ", args.getOV
-        langs, code2name = loadlangs()
+        langs = loadlangs()
         print getOV(langs[args.getOV[0]], langs[args.getOV[1]], langs["eng"])
     elif args.langdata:
         print "getting langdata... for", args.langdata

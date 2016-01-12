@@ -2,7 +2,7 @@ import argparse
 import csv
 import numpy as np
 import os.path
-import langsim
+import utils
 
 # Phonology index range (strict python indexing)
 from scipy.spatial.distance import cosine
@@ -14,7 +14,8 @@ MORPH_INDS = (19,31)
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-class WALSLanguage:
+
+class WALSLanguage(utils.Language):
     """
     This represents a single language in the WALS system. This contains a feature
     vector for the WALS features.
@@ -35,8 +36,7 @@ class WALSLanguage:
         return out
 
     def __init__(self, header, walslist):
-        # Is this high resource language?
-        self.hr = False
+        super(WALSLanguage, self).__init__()
 
         # Store everything
         self.dctzip = zip(header, walslist)
@@ -48,9 +48,6 @@ class WALSLanguage:
         # lat and long
         self.coords = (walslist[4], walslist[5])
 
-        # percentage of items that are nonzero
-        self.nonzerofrac = np.count_nonzero(self.phon_feats()) / float(len(self.phon_feats()))
-
     def __getitem__(self, item):
         return self.dct[item]
 
@@ -60,8 +57,8 @@ class WALSLanguage:
     def morph_feats(self):
         return self.feats[slice(*MORPH_INDS)]
 
-    def __repr__(self):
-        return "Language " + self.dct["Name"]
+    # def __repr__(self):
+    #     return "Language " + self.dct["Name"]
 
     def fullname(self):
         return self.dct["Name"] + ":" + self.dct["genus"] + ":" + self.dct["family"]
@@ -78,7 +75,7 @@ def loadlangs():
 
     fname = os.path.join(__location__, "data/walsdata/language.csv")
 
-    hrlangs = langsim.get_hr_languages()
+    hrlangs = utils.get_hr_languages()
         
     with open(fname) as csvfile:
         f = csv.reader(csvfile, delimiter=',', quotechar='"')
@@ -97,6 +94,7 @@ def loadlangs():
             if lang["iso_code"] in hrlangs:
                 lang.hr = True
 
+            lang.iso3 = lang["iso_code"]
             langs[lang["iso_code"]] = lang
 
         # normalize each feature by the maximum possible value.
@@ -172,20 +170,21 @@ def getclosest(lang, threshold=0, only_hr=False, topk=20):
     if only_hr:
         langs = filter(lambda l: l.hr, langs)
 
-    sims = []
+    sims = {}
 
     for lcode in langs.keys():
         l = langs[lcode]
         if l["iso_code"].decode("utf8") == lang:
             continue
 
-        sim = getphonsim(tgtlang, l)
+        #sim = getphonsim(tgtlang, l)
+        sim = getgensim(tgtlang, l)
 
-        sims.append((sim, l.fullname()))
+        sims[lcode] = sim
 
-    sims = sorted(sims, reverse=True)
+    #sims = sorted(sims, reverse=True)
 
-    return sims[:topk]
+    return sims
 
 
 def compare(lang1, lang2):

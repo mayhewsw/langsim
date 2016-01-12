@@ -1,151 +1,124 @@
-import pkgutil
+
 import argparse
 import phoible
 import wals
 import wikidatastats
 
+
 import os.path
 __location__ = os.path.dirname(os.path.realpath(__file__))
 
-class Language:
-
-    # each language has: ISO639-1 code, ISO639-3 code, wikipedia code, wikipedia name,
-    # phoible data
-    # wals data
-    # script data
-    # wikipedia file size
-    #
-
-    def __init__(self):
-        self.iso3 = None
-        self.iso1 = None
-        self.wikicode = None
-        self.wikiname = None
-        self.wikisize = None
-        self.wals_vec = None
-        self.phoible_set = None
-        self.charfreqs = None
-
-    def __repr__(self):
-        if self.iso3:
-            return "L:" + self.iso3
-        else:
-            return "L:?"
-
-
-def getlangmap():
-    """
-    This produces a map from ISO 639-3 codes to ISO 639-1 codes. Sigh.
-    :return:
-    """
-
-    fname = os.path.join(__location__, "data/iso-639-3_20150505.tab")
-
-    three2two = {}
-    with open(fname) as f:
-        for line in f:
-            sline = line.split("\t")
-
-            # if the ISO639-1 code is not there, just map to the 3 letter code.
-            twoletter = sline[3]
-            if len(twoletter.strip()) == 0:
-                twoletter = sline[0]
-            three2two[sline[0]] = twoletter
-
-    return three2two
-
-
-def get_hr_languages(hrthreshold=0):
-    """
-    :param fname: the name of the file containing filesizes. Created using wc -l in the wikidata folder
-    :param hrthreshold: how big a set of transliteration pairs needs to be considered high resource
-    :return: a map of language names (in ISO 639-3 format?)
-    """
-
-    lines = pkgutil.get_data('langsim', 'data/langsizes.txt').split("\n")
-
-    hrlangs = {}
-    for line in lines:
-        if len(line.strip()) == 0:
-            continue
-        longname, iso639_3, iso639_1, size = line.strip().split()
-        if int(size) > hrthreshold:
-            hrlangs[iso639_3] = longname
-    return hrlangs
-
-
-def sim_script(l1, l2=[]):
+def sim_script(l1, l2):
     """
     l1 and l2 are Wikipedia language names (as found in wikidata.<lang> files)
     :param l1:
     :param l2:
     :return:
     """
-
-    if len(l2) > 0:
-        print "script sim between {0} and {1}".format(l1, l2)
-        # get script stuff
-        l2 = l2[0]
-
-        sizes, langdists = wikidatastats.loaddump()
-        score = wikidatastats.compare(l1, l2, langdists)
-
-        return score
-    else:
-        print "script sim between {0} and all the rest".format(l1)
-        return 0
+    langdists = wikidatastats.loaddump()
+    return wikidatastats.compare(l1, l2, langdists)
 
 
-def sim_gen(l1, l2=[]):
+def sim_script_closest(l1):
+    langdists = wikidatastats.loaddump()
+    closest = wikidatastats.getclosest(l1, langdists)
+    return langdists, closest
+
+
+def sim_gen(l1, l2):
     # get wals
-
-    if len(l2) > 0:
-        print "gen sim between {0} and {1}".format(l1, l2)
-        l2 = l2[0]
-
-        langs = wals.loadlangs()
-
-        return wals.getgensim(langs[l1], langs[l2])
-    else:
-        print "gen sim between {0} and all the rest".format(l1)
-        return 0
+    langs = wals.loadlangs()
+    return wals.getgensim(langs[l1], langs[l2])
 
 
-def sim_phon(l1, l2=[]):
+def sim_gen_closest(l1):
+    langs = wals.loadlangs()
+    closest = wals.getclosest(l1)
+    return langs, closest
+
+
+def sim_phon(l1, l2):
     """
     l1 and l2 are 3 letter ISO language codes.
     :param l1:
     :param l2:
     :return:
     """
-
-    # get phoible
-    if len(l2) > 0:
-        print "phon sim between {0} and {1}".format(l1,l2)
-        l2 = l2[0]
-        langs,code2name = phoible.loadlangs()
-        return phoible.compare(l1, l2, langs)
-
-    else:
-        print "phon sim between {0} and all the rest".format(l1)
-        return 0
+    langs = phoible.loadlangs()
+    return phoible.compare(l1, l2, langs)
 
 
-def sim_overall(l1, l2=[], lambda1=1./3, lambda2=1./3, lambda3=1./3):
-    return lambda1 * sim_phon(l1,l2) + lambda2 * sim_script(l1,l2) + lambda3 * sim_gen(l1,l2)
+def sim_phon_closest(l1):
+    langs = phoible.loadlangs()
+    closest = phoible.getclosest(l1, langs)
+    return langs, closest
 
 
-def getclosest(l1, l2=[]):
-    # but what languages here??
-    # use sim_overall to get this... but what languages?
-    pass
+def sim_overall_closest(l1, lambda1=1./3, lambda2=1./3, lambda3=1./3):
+    """
+    Given a language, this gets a list of close languages.
+    :param l1:
+    :param lambda1:
+    :param lambda2:
+    :param lambda3:
+    :return:
+    """
+
+    phlangs,sp = sim_phon_closest(l1)
+
+    # the keys to this are wikipedia langids!
+    wikilangs,ss = sim_script_closest(l1)
+    walslangs,sg = sim_gen_closest(l1)
+
+    three2two = getlangmap()
+
+    ret = []
+    for p in sp:
+        if p in three2two:
+            p2 = three2two[p]
+        else:
+            continue
+
+        phlang = phlangs[p]
+        wikilang = wikilang[p2]
+        walslang = walslangs[p]
+
+        wikilang.iso3 = p
+
+        wikilang.phoible_set = phlang.phoible_set
+        wikilang.name = phlang.name
+
+        wikilang.wals_vec = walslang.phon_feats()
+
+        if p2 in ss and p in sg:
+            ret.append((lambda1 * sp[p] + lambda2*ss[p2] + lambda3*sg[p], sp[p], ss[p2], sg[p], phlang))
+
+    ret = sorted(ret, reverse=True)
+
+    for r in ret:
+        print r
+    return ret
+
+
+def sim_overall(l1, l2, lambda1=1./3, lambda2=1./3, lambda3=1./3):
+    """
+    This is just pairwise similarity.
+    :param l1:
+    :param l2:
+    :param lambda1:
+    :param lambda2:
+    :param lambda3:
+    :return:
+    """
+    return lambda1 * sim_phon(l1, l2) + lambda2 * sim_script(l1, l2) + lambda3 * sim_gen(l1, l2)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Interact with the Phoible database.")
+    parser = argparse.ArgumentParser(description="Interact with the LangSim databases.")
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--sim_overall", help="Get languages ordered by similarity to query", metavar="query", nargs='+')
+    group.add_argument("--sim_overall_closest", help="Get languages ordered by similarity to query", metavar="l1", nargs=1)
+    group.add_argument("--sim_overall", help="Get languages ordered by similarity to query", metavar=('l1', 'l2'), nargs=2)
     group.add_argument("--sim_gen", nargs='+')
     group.add_argument("--sim_script", help="Get the F1 score between lang1 and lang2", metavar=('lang1', 'lang2'), nargs='+')
     group.add_argument("--sim_phon", help="Get the Distinctive Feature score between lang1 and lang2", metavar=('lang1', 'lang2'), nargs='+')
@@ -153,8 +126,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.sim_overall:
-        print sim_overall(args.sim_overall[0], args.sim_overall[1:])
+    if args.sim_overall_closest:
+        print sim_overall_closest(args.sim_overall_closest[0])
     elif args.sim_gen:
         print sim_gen(args.sim_gen[0], args.sim_gen[1:])
     elif args.sim_script:

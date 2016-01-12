@@ -7,7 +7,7 @@ import math
 import string
 import argparse
 import pickle
-import langsim
+import utils
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -16,13 +16,28 @@ class StaticStats:
 
     def __init__(self):
 
-        sizes, langdists = loaddump()
-        self.sizes = sizes
+        langdists = loaddump()
         self.langdists = langdists
 
 
 def getclosest(lang, langdists):
-    pass
+
+    three2two = utils.getlangmap()
+    lang2 = three2two[lang]
+
+    langobj = langdists[lang2]
+    d1 = langobj.charfreqs
+
+    chardists = {}
+    for langcode in langdists:
+        if langcode == lang:
+            continue
+
+        l2obj = langdists[langcode]
+
+        chardists[langcode] = simdist(d1, l2obj.charfreqs)
+
+    return chardists
 
 
 def loadnamemap():
@@ -49,26 +64,22 @@ def compare(langid1, langid2, langdists):
     """
 
     # FIXME: these should be loaded somewhere else for efficiency.
-    m = loadnamemap()
-    three2two = langsim.getlangmap()
+    three2two = utils.getlangmap()
 
-    langname1 = m[three2two[langid1]]
-    langname2 = m[three2two[langid2]]
+    langid1 = three2two[langid1]
+    langid2 = three2two[langid2]
 
-    def f(i):
-        return "wikidata." + i
-
-    if f(langname1) not in langdists:
-        print langname1, "not in langdists. (This means there is no wikidata.{0} file)".format(langname1)
+    if langid1 not in langdists:
+        print langid1, "not in langdists."
         return -1
-    if f(langname2) not in langdists:
-        print langname2, "not in langdists. (This means there is no wikidata.{0} file)".format(langname2)
+    if langid2 not in langdists:
+        print langid2, "not in langdists."
         return -1
 
-    l1 = langdists[f(langname1)]
-    l2 = langdists[f(langname2)]
+    l1 = langdists[langid1]
+    l2 = langdists[langid2]
 
-    return simdist(l1, l2)
+    return simdist(l1.charfreqs, l2.charfreqs)
 
 
 def simdist(d1, d2):
@@ -95,46 +106,49 @@ def simdist(d1, d2):
     return dot
 
 
-def countscripts(sizes,langdists):
+def countscripts(langdists):
+    """
+    This counts the number of scripts in the data.
+    :param langdists:
+    :return:
+    """
     # a list of dictionaries
     scripts = []
 
-    dsizes = dict(sizes)
-
-    # this reverses sizes and makes it a dictionary
-    # new format: {lang:size, lang:size...}
-    dictsizes = dict([(p[1],p[0]) for p in sizes])
-    
-    for fname in langdists.keys():
+    for langcode in langdists:
         bestscript = None
         bestscore = -1
 
-        d1 = langdists[fname]
-        
-        if dictsizes[fname] < 100:
+        langobj = langdists[langcode]
+        d1 = langobj.charfreqs
+
+        if langobj.wikisize < 100:
             continue
-        
+
         # script is a dictionary
         for script in scripts:
 
-            fname2 = script.keys()[0]
-            d2 = langdists[fname2]
-            
-            score = simdist(d1,d2)
+            langcode2 = script.keys()[0]
+            langobj2 = langdists[langcode2]
+            d2 = langobj2.charfreqs
+
+            score = simdist(d1, d2)
             if score > bestscore:
                 bestscore = score
                 bestscript = script
-        threshold = 0.004
+
+        # arbitarily set... if two languages have similar scripts
+        # the similarity is usually above 0.5
+        threshold = 0.5
         
         if bestscore > threshold:
-            bestscript[fname] = langdists[fname]
+            bestscript[langcode] = langobj
         else:
-            scripts.append({fname : langdists[fname]})
-
+            scripts.append({langcode: langobj})
 
     for s in scripts:
         keys = s.keys()
-        keysizepairs = map(lambda k: (dictsizes[k],k), keys)
+        keysizepairs = map(lambda k: (langdists[k].wikisize, langdists[k].wikiname), keys)
         print sorted(keysizepairs)
     print "There are {0} scripts represented.".format(len(scripts))
             
@@ -142,6 +156,7 @@ def countscripts(sizes,langdists):
 def makedump(mypath):
     """
     This collects and dumps information about every wikidata file.
+    :param mypath is the path to the wikidata/ folder.
     """
     
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
@@ -188,12 +203,12 @@ def makedump(mypath):
 
 
 def loaddump():
-    fname = os.path.join(__location__, "data/sizes-langdists.pkl")
+    fname = os.path.join(__location__, "data/wikilanguages.pkl")
 
     f = open(fname)
-    sizes, langdists = pickle.load(f)
+    langdists = pickle.load(f)
     f.close()
-    return sizes, langdists
+    return langdists
 
 
 if __name__ == "__main__":
@@ -206,27 +221,15 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    sizes,langdists = loaddump()
+    langdists = loaddump()
 
     if args.getclosest:
         lang = args.getclosest[0]
-        d1 = langdists["wikidata." + lang]
-        
-        chardists = []
-        for fname in langdists:
-            if fname == "wikidata." + lang:
-                continue
-            chardists.append((simdist(d1, langdists[fname]), fname))
-
-        st = sorted(chardists, reverse=True)
-        topk = 20
-        for p in st[:topk]:
-            print p
+        getclosest(lang, langdists)
     elif args.countscripts:        
-        countscripts(sizes,langdists)
+        countscripts(langdists)
     elif args.listsizes:
-        for p in sizes:
-            print p[1],p[0]
+        print "Whoops... not working right now..."
     elif args.compare:
         print args.compare
         # why are first and second
