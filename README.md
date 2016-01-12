@@ -8,6 +8,7 @@ This code is running at [stephen-mayhew.com/langsim](http://stephen-mayhew.com/l
 
 # To Install
 Run
+
     $ git clone https://github.com/mayhewsw/langsim
     $ cd langsim
     $ python setup.py install
