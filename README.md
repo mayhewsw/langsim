@@ -4,10 +4,13 @@ This is a python package that measures language similarity in many different way
 
 All data files are packaged with the code.
 
-# To Install
-Download the zip file and run:
+This code is running at [stephen-mayhew.com/langsim](http://stephen-mayhew.com/langsim)
 
-    python setup.py install
+# To Install
+Run
+    $ git clone https://github.com/mayhewsw/langsim
+    $ cd langsim
+    $ python setup.py install
 
 # To Use
 `langsim.py` is the main file in this distribution. The main function to be used is `sim_overall_closest(lang)` and `sim_overall(l1, l2)`. The first returns a list of languages ranked according to similarity to `lang`, the second gets the overall similarity between `l1` and `l2`.
@@ -23,4 +26,11 @@ result = langsim.sim_closest_overall("eng")
 > (overall sim, phonetic sim, script sim, genealogical sim, Language object).
 
 `Language` class is defined in `utils.py`.
+
+# Contribute
+Feel free to fork and send pull requests!
+
+# Related
+
+Perhaps this should be merged with [lingpy](https://github.com/lingpy/lingpy). Also [clld](https://github.com/clld/clld) and [glottolog](http://glottolog.org/) are related. 
 
