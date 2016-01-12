@@ -120,7 +120,7 @@ def getclosest(query, langs, only_hr=False, topk=100000):
     # this is a set of phonemes
     orig = langs[query]
 
-    hrlangs = utils.get_hr_languages()
+    #hrlangs = utils.get_hr_languages()
 
     pmap = readfeaturefile()
 
@@ -130,7 +130,7 @@ def getclosest(query, langs, only_hr=False, topk=100000):
 
         if langid == query:
             continue
-        if not only_hr or langid in hrlangs:
+        if True: #not only_hr or langid in hrlangs:
             # try getting F1 here instead of just intersection.
             tgt = langs[langid]
 

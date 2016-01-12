@@ -75,7 +75,7 @@ def loadlangs():
 
     fname = os.path.join(__location__, "data/walsdata/language.csv")
 
-    hrlangs = utils.get_hr_languages()
+    #hrlangs = utils.get_hr_languages()
         
     with open(fname) as csvfile:
         f = csv.reader(csvfile, delimiter=',', quotechar='"')
@@ -91,8 +91,8 @@ def loadlangs():
 
             maxvals = np.maximum(maxvals, lang.feats)
 
-            if lang["iso_code"] in hrlangs:
-                lang.hr = True
+            #if lang["iso_code"] in hrlangs:
+            #    lang.hr = True
 
             lang.iso3 = lang["iso_code"]
             langs[lang["iso_code"]] = lang
