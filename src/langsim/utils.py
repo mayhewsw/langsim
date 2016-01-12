@@ -1,8 +1,6 @@
 import os.path
 import pkgutil
 
-print "WOO utils imported"
-
 __location__ = os.path.dirname(os.path.realpath(__file__))
 
 

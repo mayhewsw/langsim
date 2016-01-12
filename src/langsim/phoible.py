@@ -1,4 +1,3 @@
-from collections import defaultdict
 from scipy.spatial.distance import cosine
 import os
 import codecs

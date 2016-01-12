@@ -94,8 +94,6 @@ def sim_overall_closest(l1, lambda1=1./3, lambda2=1./3, lambda3=1./3):
 
     ret = sorted(ret, reverse=True)
 
-    for r in ret:
-        print r
     return ret
 
 
