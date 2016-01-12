@@ -177,7 +177,7 @@ def makedump(mypath):
         with open(os.path.join(mypath, fname)) as f:
             lines = f.readlines()
 
-            lang = langsim.Language()
+            lang = utils.Language()
 
             header = lines[0].strip("#").strip().split("\t")
             
