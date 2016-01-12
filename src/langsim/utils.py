@@ -1,7 +1,10 @@
 import os.path
 import pkgutil
 
+print "WOO utils imported"
+
 __location__ = os.path.dirname(os.path.realpath(__file__))
+
 
 class Language(object):
     # each language has: ISO639-1 code, ISO639-3 code, wikipedia code, wikipedia name,

@@ -1,4 +1,3 @@
-
 import argparse
 import phoible
 import wals
@@ -7,6 +6,7 @@ import utils
 
 import os.path
 __location__ = os.path.dirname(os.path.realpath(__file__))
+
 
 def sim_script(l1, l2):
     """
