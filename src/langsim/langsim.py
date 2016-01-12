@@ -3,7 +3,7 @@ import argparse
 import phoible
 import wals
 import wikidatastats
-
+import utils
 
 import os.path
 __location__ = os.path.dirname(os.path.realpath(__file__))
@@ -70,7 +70,7 @@ def sim_overall_closest(l1, lambda1=1./3, lambda2=1./3, lambda3=1./3):
     wikilangs,ss = sim_script_closest(l1)
     walslangs,sg = sim_gen_closest(l1)
 
-    three2two = getlangmap()
+    three2two = utils.getlangmap()
 
     ret = []
     for p in sp:
@@ -79,18 +79,17 @@ def sim_overall_closest(l1, lambda1=1./3, lambda2=1./3, lambda3=1./3):
         else:
             continue
 
-        phlang = phlangs[p]
-        wikilang = wikilang[p2]
-        walslang = walslangs[p]
-
-        wikilang.iso3 = p
-
-        wikilang.phoible_set = phlang.phoible_set
-        wikilang.name = phlang.name
-
-        wikilang.wals_vec = walslang.phon_feats()
-
         if p2 in ss and p in sg:
+            phlang = phlangs[p]
+            wikilang = wikilangs[p2]
+            walslang = walslangs[p]
+
+            wikilang.iso3 = p
+
+            wikilang.phoible_set = phlang.phoible_set
+            wikilang.name = phlang.name
+
+            wikilang.wals_vec = walslang.phon_feats()
             ret.append((lambda1 * sp[p] + lambda2*ss[p2] + lambda3*sg[p], sp[p], ss[p2], sg[p], phlang))
 
     ret = sorted(ret, reverse=True)
