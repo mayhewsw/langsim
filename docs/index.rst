@@ -6,11 +6,14 @@
 Welcome to langsim's documentation!
 ===================================
 
+.. image:: https://readthedocs.org/projects/langsim/badge/?version=latest
+:target: http://langsim.readthedocs.org/en/latest/?badge=latest
+:alt: Documentation Status
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
-
    wals
 
 
