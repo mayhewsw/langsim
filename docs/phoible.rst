@@ -1,4 +1,6 @@
 Phoible
 =======
 
-This is good stuff right here.
+Phoible is a database of phonetic inventories for about 1600 languages across the world.
+
+See Phoible here: `Phoible <http://phoible.org>`_

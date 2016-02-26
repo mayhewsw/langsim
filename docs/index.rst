@@ -12,6 +12,22 @@ Welcome to langsim's documentation!
 
 langsim is a tool for use with WALS and Phoible for getting language similarity for different tasks.
 
+Features
+========
+
+Use this as a way to interact with URIEL, WALS, Phoible.
+
+
+Installation
+============
+
+Installation is very simple::
+
+    $ git clone https://github.com/mayhewsw/langsim
+    $ cd langsim
+    $ python setup.py install
+
+
 Contents:
 =========
 
