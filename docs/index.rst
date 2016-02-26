@@ -12,11 +12,4 @@ Contents:
    :maxdepth: 2
 
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+langsim is a tool for use with WALS and Phoible for getting language similarity for different tasks.
