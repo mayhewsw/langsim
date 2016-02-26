@@ -19,6 +19,8 @@ Contents:
    :maxdepth: 2
 
    wals
+   phoible
+   uriel
 
 
 
