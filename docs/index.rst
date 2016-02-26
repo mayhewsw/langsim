@@ -11,5 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   wals
+
 
 langsim is a tool for use with WALS and Phoible for getting language similarity for different tasks.
