@@ -6,6 +6,8 @@ All data files are packaged with the code.
 
 This code is running at [stephen-mayhew.com/langsim](http://stephen-mayhew.com/langsim)
 
+See documentation at [langsim.readthedocs.org](http://langsim.readthedocs.org/)
+
 # To Install
 Run
 

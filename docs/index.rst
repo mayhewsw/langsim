@@ -37,6 +37,7 @@ Contents:
    wals
    phoible
    uriel
+   utils
 
 
 
