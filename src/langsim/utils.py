@@ -5,6 +5,9 @@ __location__ = os.path.dirname(os.path.realpath(__file__))
 
 
 class Language(object):
+    """
+    Language class
+    """
     # each language has: ISO639-1 code, ISO639-3 code, wikipedia code, wikipedia name,
     # phoible data
     # wals data
