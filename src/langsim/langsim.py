@@ -134,11 +134,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.sim_overall_closest:
-        print sim_overall_closest(args.sim_overall_closest[0])
+        clo = sim_overall_closest(args.sim_overall_closest[0])
+        print "\t".join([args.sim_overall_closest[0], "1.0", "1.0", "1.0", "1.0"])
+        for p in clo:
+            n = p[-1].iso3
+            print n + "\t" + "\t".join(map(str, p[:-1]))
     elif args.sim_gen:
         print sim_gen(args.sim_gen[0], args.sim_gen[1:])
     elif args.sim_script:
         print sim_script(args.sim_script[0], args.sim_script[1:])
     elif args.sim_phon:
         print sim_phon(args.sim_phon[0], args.sim_phon[1:])
+    else:
+        print "Oops! Not an option."
 

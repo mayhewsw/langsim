@@ -21,13 +21,39 @@ class Language(object):
         self.phoible_set = set()
         self.charfreqs = None
         self.name = None
+        self.alternate_names = set()
 
     def __repr__(self):
-        if self.iso3:
-            return "L:" + self.iso3
-        else:
-            return "L:?"
+        return "L:[" + " ".join(map(lambda i: str(i), [self.iso3, self.iso1, self.wikicode, self.wikiname])) + "]"
 
+
+def loadLangs():
+
+    # data/wals
+
+
+
+    
+    pass
+
+
+    
+def getmissingmap():
+    """
+    Get the map of languages missing from Phoible
+    """
+    with open("data/missing.map") as f:
+        lines = f.readlines()
+    m = {}
+    for line in lines:
+        if line.startswith("#"):
+            continue
+        missing,target = line.strip().split()
+        if "," in target:
+            # just take the first one...
+            target = target.split(",")[0]
+        m[missing] = target
+    return m
 
 def getlangmap():
     """
@@ -50,21 +76,22 @@ def getlangmap():
 
     return three2two
 
-
-def get_hr_languages(hrthreshold=0):
+def getlangmap2to3():
     """
-    :param fname: the name of the file containing filesizes. Created using wc -l in the wikidata folder
-    :param hrthreshold: how big a set of transliteration pairs needs to be considered high resource
-    :return: a map of language names (in ISO 639-3 format?)
+    This produces a map from ISO 639-3 codes to ISO 639-1 codes. Sigh.
+    :return:
     """
 
-    lines = pkgutil.get_data('langsim', 'data/langsizes.txt').split("\n")
+    fname = os.path.join(__location__, "data/iso-639-3_20150505.tab")
 
-    hrlangs = {}
-    for line in lines:
-        if len(line.strip()) == 0:
-            continue
-        longname, iso639_3, iso639_1, size = line.strip().split()
-        if int(size) > hrthreshold:
-            hrlangs[iso639_3] = longname
-    return hrlangs
+    two2three = {}
+    with open(fname) as f:
+        for line in f:
+            sline = line.split("\t")
+
+            # if the ISO639-1 code is not there, just map to the 3 letter code.
+            twoletter = sline[3]
+            if len(twoletter.strip()) > 0:
+                two2three[twoletter] = sline[0]
+
+    return two2three

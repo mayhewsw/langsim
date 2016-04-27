@@ -2,6 +2,7 @@ from scipy.spatial.distance import cosine
 import os
 import codecs
 import utils
+from collections import defaultdict
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -105,7 +106,31 @@ def loadlangdata():
             outdct[code] = ldict
 
     return outdct
-                
+
+def loadtrumps():
+    """
+    :return: a map from {lang : [trump1, trump2...], etc. }
+    """
+    fname = os.path.join(__location__, "data/phoibledata/phoible-aggregated.tsv")
+
+    outdct = defaultdict(list)
+    
+    with open(fname) as p:
+        lines = p.readlines()
+        for line in lines[1:]:
+            sline = line.split("\t")
+            code = sline[2]
+            trump = int(sline[6])
+            source = sline[1]
+            outdct[code].append((source, trump))
+
+    # sort them here...
+    for k in outdct:
+        trumps = outdct[k]
+        outdct[k] = map(lambda p: p[0], sorted(trumps, key=lambda p: p[1]))
+
+    return outdct
+    
 
 def getclosest(query, langs, only_hr=False, topk=100000):
     """

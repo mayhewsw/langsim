@@ -151,7 +151,30 @@ def countscripts(langdists):
         keysizepairs = map(lambda k: (langdists[k].wikisize, langdists[k].wikiname), keys)
         print sorted(keysizepairs)
     print "There are {0} scripts represented.".format(len(scripts))
+
+
+def listsizes(limit=0):
+    """
+    List all the languages with size greater than limit
+     :param: integer lower limit on number of lines in the data file
+    """
+    
+    out = []
+    for k in langdists.keys():
+        l = langdists[k]
+        if l.wikisize > int(limit):
+            out.append(l)
+
+    lm = utils.getlangmap2to3()
             
+    s = sorted(out, key=lambda l: l.wikisize)
+    for l in s:
+        if len(l.wikicode) == 2:
+            c = lm[l.wikicode]
+        else:
+            c = l.wikicode
+        print c,l.wikiname, l.wikisize
+        
 
 def makedump(mypath):
     """
@@ -214,22 +237,23 @@ def loaddump():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     g = parser.add_mutually_exclusive_group(required=True)
-    g.add_argument("--listsizes", help="Print a sorted list of file sizes", action="store_true")
+    g.add_argument("--listsizes", help="Print a sorted list of file sizes")
     g.add_argument("--getclosest", help="Compare LANG against all others", nargs=1)
     g.add_argument("--compare", help="Compare LANG1 against LANG2", nargs=2)
     g.add_argument("--countscripts", help="Get a grouping of scripts", action="store_true")
+    g.add_argument("--makedump", help="Create the dump", nargs=1)
     
     args = parser.parse_args()
 
     langdists = loaddump()
-
+    
     if args.getclosest:
         lang = args.getclosest[0]
         getclosest(lang, langdists)
     elif args.countscripts:        
         countscripts(langdists)
     elif args.listsizes:
-        print "Whoops... not working right now..."
+        listsizes(args.listsizes)
     elif args.compare:
         print args.compare
         # why are first and second
@@ -239,7 +263,9 @@ if __name__ == "__main__":
         #print simdist(d1, d2)
 
         print compare(args.compare[0], args.compare[1], langdists)
-
+    elif args.makedump:
+        print args.makedump
+        makedump(args.makedump[0])
     else:
         print "Whoops... argparse shouldn't let you get here"
         
