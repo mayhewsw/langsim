@@ -9,5 +9,5 @@ See URIEL here: `URIEL <http://www.cs.cmu.edu/~dmortens/uriel.html>`_
 Module Documentation
 ---------------------
 
-.. automodule:: wals
+.. automodule:: uriel
    :members:
