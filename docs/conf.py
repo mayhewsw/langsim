@@ -14,10 +14,9 @@
 
 import sys
 import os
-import shlex
 import mock
 
-MOCK_MODULES = ['numpy', 'scipy', 'scipy.interpolate', 'scipy.spatial.distance', 'wikidatastats', 'uriel','langsim','phoible', 'wals']
+MOCK_MODULES = ['numpy', 'scipy', 'scipy.interpolate', 'scipy.spatial.distance', 'wikidatastats','langsim','phoible']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
