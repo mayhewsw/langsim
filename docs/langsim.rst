@@ -1,4 +1,4 @@
-Langsim modeul
+Langsim
 =======
 
 This is the main module to be using.
