@@ -129,6 +129,7 @@ def getclosest(query):
 def getInventory(lang):
     """
     Get the phoneme inventory for lang from URIEL (note: this is slightly different from what is in Phoible)
+
     :param: an ISO639-3 language code.
     :return: a set of inventory strings.
     """

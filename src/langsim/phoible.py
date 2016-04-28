@@ -44,6 +44,7 @@ class Phoneme:
 def loadlangs():
     """
     This takes the filename of the phoible data and reads it into useful structures.
+
     :param fname: the name of the phoible file, typically gold-standard/phoible-phonemes.tsv
     :return: a map of {langcode : set(phonemes), ...}, a map of {langcode : langname, ...}
     """
@@ -184,6 +185,7 @@ def comparephonemes(l1, l2):
     """
     Given the phoible-phonemes file, and two langnames, this will print
     the common and unique phonemes between these languages.
+
     :param fname: phoible-phonemes.tsv file
     :param l1: langcode
     :param l2: langcode
@@ -237,6 +239,7 @@ def readfeaturefile():
     """
     This loads the distinctive features file in phoible, typically
     called raw-data/FEATURES/phoible-segments-features.tsv
+
     :return: a map of {phoneme : {df : val, df : val, ...}, ...}
     """
 

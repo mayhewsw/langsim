@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 def sim_script(l1, l2):
     """
     l1 and l2 are Wikipedia language names (as found in wikidata.<lang> files)
+
     :param l1:
     :param l2:
     :return:
@@ -47,6 +48,7 @@ def sim_gen_closest(l1):
 def sim_phon(l1, l2):
     """
     l1 and l2 are 3 letter ISO language codes.
+
     :param l1:
     :param l2:
     :return:
@@ -78,6 +80,7 @@ def sim_phon_closest(l1):
 def sim_overall_closest(l1, lambda1=1./3, lambda2=1./3, lambda3=1./3):
     """
     Given a language, this gets a list of close languages.
+
     :param l1:
     :param lambda1:
     :param lambda2:
@@ -117,6 +120,7 @@ def sim_overall_closest(l1, lambda1=1./3, lambda2=1./3, lambda3=1./3):
 def sim_overall(l1, l2, lambda1=1./3, lambda2=1./3, lambda3=1./3):
     """
     This is just pairwise similarity.
+
     :param l1:
     :param l2:
     :param lambda1:

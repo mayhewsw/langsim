@@ -49,6 +49,7 @@ def getclosest(lang, langdists):
 def loadnamemap():
     """
     Produces a map from two letter code to wikipedia name
+
     :return:
     """
     fname = os.path.join(__location__, "data/wikilanguages")
@@ -64,6 +65,7 @@ def loadnamemap():
 def compare(langid1, langid2, langdists):
     """
     Get score for these two
+
     :param langid1:
     :param langid2:
     :return: a score of script similarity
@@ -115,6 +117,7 @@ def simdist(d1, d2):
 def countscripts(langdists):
     """
     This counts the number of scripts in the data.
+
     :param langdists:
     :return:
     """
@@ -162,6 +165,7 @@ def countscripts(langdists):
 def listsizes(limit=0):
     """
     List all the languages with size greater than limit
+
      :param: integer lower limit on number of lines in the data file
     """
     
@@ -185,6 +189,7 @@ def listsizes(limit=0):
 def makedump(mypath):
     """
     This collects and dumps information about every wikidata file.
+
     :param mypath is the path to the wikidata/ folder.
     """
     

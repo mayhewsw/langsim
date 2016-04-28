@@ -74,6 +74,7 @@ class WALSLanguage(utils.Language):
 def loadlangs():
     """
     This loads the WALS file into the WALSLanguage data structures
+
     :return: list of WALSLanguage objects
     """
 
@@ -113,6 +114,7 @@ def loadlangs():
 def getphonsim(l1, l2):
     """
     This gets the average number of identical values between vectors.
+
     :param l1: a WALSLanguage
     :param l2: a WALSLanguage
     :return: a similarity value between 0 (not similar) and 1 (most similar)
@@ -140,6 +142,7 @@ def getphonsim(l1, l2):
 def getgensim(l1, l2):
     """
     Get genealogical similarity between languages. These are WALSLanguage objects.
+
     :param l1:
     :param l2:
     :return:
@@ -156,6 +159,7 @@ def getgensim(l1, l2):
 def getclosest(lang, threshold=0, only_hr=False, topk=20):
     """
     Gets a topk list of languages similar to this language, various parameters control this.
+
     :param lang:
     :param threshold:
     :param only_hr:
@@ -198,6 +202,7 @@ def getclosest(lang, threshold=0, only_hr=False, topk=20):
 def compare(lang1, lang2):
     """
     Given two language names, get distance according to phonology scores.
+
     :param lang1: name of first lang (eg English)
     :param lang2: name of second lang
     :return: the distance of the languages, or -1 if one or both langs not found.
@@ -214,6 +219,7 @@ def compare(lang1, lang2):
 def comparefeats(lang1, lang2):
     """
     What does this do???
+
     :param lang1:
     :param lang2:
     :return:
