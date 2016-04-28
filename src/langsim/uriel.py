@@ -3,12 +3,10 @@ import numpy as np
 from collections import defaultdict
 import os
 import phoible
+import utils
 import logging
 
-FORMAT = "[%(asctime)s] : %(filename)s.%(funcName)s():%(lineno)d - %(message)s"
-DATEFMT = '%H:%M:%S, %m/%d/%Y'
-
-logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt=DATEFMT)
+logging.basicConfig(level=logging.INFO, format=utils.FORMAT, datefmt=utils.DATEFMT)
 logger = logging.getLogger(__name__)
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -23,67 +21,134 @@ class UrielData:
     
     def __init__(self):
         self.distances = None
+        self.distlangs = None
         self.features = None
-        self.langs = None
+        self.featlangs = None
+        self.invsets = None
 
+        self.phoiblesources = None
+        self.phoiblefeats = None
+        self.invsets = None
 
     def loaddistances(self):
         if self.distances is None:
             self.distances = np.load(urielfolder + "distances/distances.npz")
 
-        if self.langs is None:
-            self.langs = self.distances["langs"]
+        if self.distlangs is None:
+            self.distlangs = self.distances["langs"]
             
     def loadfeatures(self):
         if self.features is None:
             self.features = np.load(urielfolder + "features/features.npz")
             
         # I hope these are identical!!
-        if self.langs is None:
-            self.langs = self.features["langs"]
+        if self.featlangs is None:
+            self.featlangs = self.features["langs"]
+
+    def getphoibleindices(self):
+        self.phoiblefeats = []
+        for i,f in enumerate(u.features["feats"]):
+            if "INV" in f:
+                self.phoiblefeats.append((i,f))
+
+        self.phoiblesources = []
+        for j,s in enumerate(u.features["sources"]):
+            if "PHOIBLE" in s:
+                self.phoiblesources.append((j,s))
+
+    def loadinventorysets(self, langlist=None):
+        """
+        This loads inventory sets. The form is:
+        {lang : {source : set(seg, ...), ...}, ...}
+        """
+
+        if self.invsets is None:
+            self.invsets = {}
+            self.loadfeatures()
+            self.getphoibleindices()
+
+            logger.info("Loading inventory sets...")
+            logger.debug("Langlist: " + str(langlist))
+
+            enum = zip(range(len(self.featlangs)), self.featlangs)
+
+            if langlist is not None:
+                newenum = []
+                for l,lang in enum:
+                    if lang in langlist:
+                        newenum.append((l,lang))
+                enum = newenum
+
+            d = u.features["data"]
+
+            for l, lang in enum:
+                lfeats = d[l]
+
+                logger.debug("Loading %s", lang)
+
+                lset = defaultdict(set)
+
+                for i, f in u.phoiblefeats:
+                    lfeatsi = lfeats[i]
+                    for j,s in u.phoiblesources:
+                        if lfeatsi[j] == 1.0:
+                            lset[s].add(f)
+
+                self.invsets[lang] = lset
 
 u = UrielData()
+trumps = phoible.loadtrumps()
 
-# wikilangs = set()
-# with open("/shared/experiments/mayhew2/transliteration/tl_sim/wikinames.txt") as f:
-#     for line in f:
-#         sline = line.split()
-#         if not sline[0] in langs:
-#             print sline[0], "is NOT in langs"
-#         else:
-#             wikilangs.add(sline[0])
+def getclosest(query):
+    """
+    get closest in here...
+    """
 
-    
+    # this is a set of phonemes
+    orig = getInventory(query)
+
+    sims = {}
+
+    for langid in u.invsets.keys():
+
+        if langid == query:
+            continue
+
+        # try getting F1 here instead of just intersection.
+        tgt = getInventory(langid)
+
+        score = phoible.getF1(orig, tgt)
+        #score = getDistinctiveFeatures(orig, tgt, pmap)
+        #score = getOV(tgt, orig, langs["eng"])
+
+        sims[langid] = score
+
+    return sims
+
+
 def getInventory(lang):
     """
     Get the phoneme inventory for lang from URIEL (note: this is slightly different from what is in Phoible)
     :param: an ISO639-3 language code.
     :return: a set of inventory strings.
     """
-    u.loadfeatures()
-    trumps = phoible.loadtrumps()
-    
-    lang_ind = np.where(u.langs==lang)
 
-    if len(lang_ind[0]) == 0:
-        print "Could not find lang:", lang
+    if u.invsets is None:
+        logger.error("u.invsets is None. Initialize with u.loadinventorysets()")
+        return set()
+
+    if lang not in u.invsets:
+        logger.error("Could not find lang: " + lang)
         return
-    
-    lfeats = u.features["data"][lang_ind][0]
 
-    lset = defaultdict(set)
+    lset = u.invsets[lang]
 
-    for i,f in enumerate(u.features["feats"]):
-        for j,s in enumerate(u.features["sources"]):
-            if lfeats[i][j] == 1.0 and "PHOIBLE" in s and "INV" in f:
-                lset[s].add(f)
-                
-    print lang
+    logger.debug("Loading: " + lang)
 
     inv = set()
     
     if len(lset) == 0:
-        print "No inventory for lang", lang
+        logger.error("No inventory for lang: " + lang)
     elif len(lset) == 1:
         source = lset.keys()[0]
         logger.debug("Only source: " + source)
@@ -102,41 +167,58 @@ def getInventory(lang):
         else:
             logger.debug(lang + " not in trumps, just taking first source...")
             source = lset.keys()[0]
-            logger.debug("All sources: " + lset.keys())
+            logger.debug("All sources: " + str(lset.keys()))
 
             inv = lset[source]
             
     return inv
 
-        
 if __name__ == "__main__":
 
     import argparse
     parser = argparse.ArgumentParser(description="Interact with URIEL database")
-    
+
+    parser.add_argument("--langlist", "-l", help="A file containing a list of languages to use", nargs=1)
+
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--getInventory","-i",help="Get inventory for LANG",metavar="LANG", nargs=1)
-    group.add_argument("--getF1",help="Get F1 between L1 and L2",metavar=("L1", "L2"), nargs=2)
+    group.add_argument("--getInventory", "-i", help="Get inventory for LANG", metavar="LANG", nargs=1)
+    group.add_argument("--getF1", help="Get F1 between L1 and L2", metavar=("L1", "L2"), nargs=2)
+    group.add_argument("--getClosest", help="Get closest langs to L", metavar="L", nargs=1)
     
     args = parser.parse_args()
+
+    # langlist represents a list of languages to use.
+    if args.langlist:
+        lines = map(lambda s: s[0], utils.readFile(args.langlist[0], sep=" "))
+        u.loadinventorysets(lines)
+    else:
+        u.loadinventorysets()
 
     if args.getInventory:
         getInventory(args.getInventory[0])
     elif args.getF1:
-        l1,l2 = args.getF1
-        print l1
-        print l2
-        l1set= getInventory(l1)
-        l2set= getInventory(l2)
+        l1, l2 = args.getF1
 
-        tp = len(l1set.intersection(l2set))
-        fp = len(l1set - l2set)
-        fn = len(l2set - l1set)
+        l1set = getInventory(l1)
+        l2set = getInventory(l2)
 
-        print tp,fp,fn
-        prec = tp / float(tp + fp)
-        rec = tp / float(tp + fn)
-        f1 = 2 * prec * rec / (prec + rec)
-        print prec, rec, f1
+        print phoible.getF1(l1set, l2set)
+    elif args.getClosest:
+        lang = args.getClosest[0]
+        c = getclosest(lang)
+        ci = sorted(c.items(), key=lambda p: p[1], reverse=True)
+        logger.info("Writing to mine." + lang)
+        with open("mine." + lang, "w") as out:
+            out.write(lang + "\t1.0\n")
+            ignored = 0
+            iset = set()
+            for l in ci:
+                if l[1] >= 0:
+                    out.write(l[0] + "\t" + str(l[1]) + "\n")
+                else:
+                    iset.add(l[0])
+                    ignored += 1
+            print iset
+            logger.info("Ignored {0}/{1} languages.".format(ignored, len(ci)))
 
-        
+

@@ -5,14 +5,12 @@ import wikidatastats
 import utils
 import logging
 import os.path
+import uriel
+import pkgutil
 
 __location__ = os.path.dirname(os.path.realpath(__file__))
 
-
-FORMAT = "[%(asctime)s] : %(filename)s.%(funcName)s():%(lineno)d - %(message)s"
-DATEFMT = '%H:%M:%S, %m/%d/%Y'
-
-logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt=DATEFMT)
+logging.basicConfig(level=logging.DEBUG, format=utils.FORMAT, datefmt=utils.DATEFMT)
 logger = logging.getLogger(__name__)
 
 
@@ -58,9 +56,23 @@ def sim_phon(l1, l2):
 
 
 def sim_phon_closest(l1):
-    langs = phoible.loadlangs()
-    closest = phoible.getclosest(l1, langs)
+    """
+    Should return a tuple: langs, closest.
+    """
+    #langs = phoible.loadlangs()
+    #closest = phoible.getclosest(l1, langs)
+    #return langs, closest
+
+    uriel.u.loadfeatures()
+
+    # hack!
+    langlist = map(lambda p: p[0], utils.readFile("/shared/experiments/mayhew2/transliteration/tl_sim/wikinames.txt"))
+    uriel.u.loadinventorysets(langlist)
+
+    closest = uriel.getclosest(l1)
+    langs = uriel.u.featlangs
     return langs, closest
+
 
 
 def sim_overall_closest(l1, lambda1=1./3, lambda2=1./3, lambda3=1./3):
@@ -82,23 +94,19 @@ def sim_overall_closest(l1, lambda1=1./3, lambda2=1./3, lambda3=1./3):
     three2two = utils.getlangmap()
 
     ret = []
+
+    # loop over languages in phoible set (which are 3 char)
     for p in sp:
+        # skip if we can't get it into 2 char
         if p in three2two:
             p2 = three2two[p]
         else:
             continue
 
+        # if the 2 char is in the wiki name list, and the 3 char is in the wals list, we're good!
         if p2 in ss and p in sg:
-            phlang = phlangs[p]
-            wikilang = wikilangs[p2]
-            walslang = walslangs[p]
-
-            wikilang.iso3 = p
-
-            wikilang.phoible_set = phlang.phoible_set
-            wikilang.name = phlang.name
-
-            wikilang.wals_vec = walslang.phon_feats()
+            phlang = utils.Language()
+            phlang.iso3 = p
             ret.append((lambda1 * sp[p] + lambda2*ss[p2] + lambda3*sg[p], sp[p], ss[p2], sg[p], phlang))
 
     ret = sorted(ret, reverse=True)
@@ -134,11 +142,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.sim_overall_closest:
-        clo = sim_overall_closest(args.sim_overall_closest[0])
-        print "\t".join([args.sim_overall_closest[0], "1.0", "1.0", "1.0", "1.0"])
-        for p in clo:
-            n = p[-1].iso3
-            print n + "\t" + "\t".join(map(str, p[:-1]))
+        lang = args.sim_overall_closest[0]
+        clo = sim_overall_closest(lang)
+        print "writing to: langsim." + lang
+        with open("langsim." + lang, "w") as out:
+            out.write("\t".join(["# Overall", "phonetic", "script", "genealogical"]) + "\n")
+            out.write("\t".join([args.sim_overall_closest[0], "1.0", "1.0", "1.0", "1.0"]) + "\n")
+            for p in clo:
+                n = p[-1].iso3
+                out.write(n + "\t" + "\t".join(map(str, p[:-1])) + "\n")
     elif args.sim_gen:
         print sim_gen(args.sim_gen[0], args.sim_gen[1:])
     elif args.sim_script:

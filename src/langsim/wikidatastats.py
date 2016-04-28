@@ -8,9 +8,15 @@ import string
 import argparse
 import pickle
 import utils
+import logging
+
+import utils
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
+
+logging.basicConfig(level=logging.INFO, format=utils.FORMAT, datefmt=utils.DATEFMT)
+logger = logging.getLogger(__name__)
 
 class StaticStats:
 
@@ -249,7 +255,7 @@ if __name__ == "__main__":
     
     if args.getclosest:
         lang = args.getclosest[0]
-        getclosest(lang, langdists)
+        print getclosest(lang, langdists)
     elif args.countscripts:        
         countscripts(langdists)
     elif args.listsizes:

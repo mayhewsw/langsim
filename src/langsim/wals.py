@@ -3,6 +3,10 @@ import csv
 import numpy as np
 import os.path
 import utils
+import logging
+
+logging.basicConfig(level=logging.INFO, format=utils.FORMAT, datefmt=utils.DATEFMT)
+logger = logging.getLogger(__name__)
 
 # Phonology index range (strict python indexing)
 from scipy.spatial.distance import cosine
@@ -75,8 +79,6 @@ def loadlangs():
 
     fname = os.path.join(__location__, "data/walsdata/language.csv")
 
-    #hrlangs = utils.get_hr_languages()
-        
     with open(fname) as csvfile:
         f = csv.reader(csvfile, delimiter=',', quotechar='"')
 
@@ -91,10 +93,13 @@ def loadlangs():
 
             maxvals = np.maximum(maxvals, lang.feats)
 
-            #if lang["iso_code"] in hrlangs:
-            #    lang.hr = True
-
             lang.iso3 = lang["iso_code"]
+            lang.wals_code = lang["wals_code"]
+
+            # FIXME: something of a hack. It is possible (even likely) that some lines in
+            # wals share an iso_code (for example arm and arw both have hye as iso_code)
+            # These will be overwrittein in langs. For now... we don't mind.
+            langs[lang["wals_code"]] = lang
             langs[lang["iso_code"]] = lang
 
         # normalize each feature by the maximum possible value.
@@ -160,6 +165,9 @@ def getclosest(lang, threshold=0, only_hr=False, topk=20):
 
     langs = loadlangs()
 
+    if lang not in langs:
+        logger.error("WALS does not have language: " + lang)
+        return
     tgtlang = langs[lang]
 
     if tgtlang == None:

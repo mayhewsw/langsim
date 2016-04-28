@@ -1,7 +1,15 @@
 import os.path
 import pkgutil
+import logging
+import re
 
 __location__ = os.path.dirname(os.path.realpath(__file__))
+
+FORMAT = "[%(asctime)s] : %(levelname)s %(filename)s.%(funcName)s():%(lineno)d - %(message)s"
+DATEFMT = '%H:%M:%S, %m/%d/%Y'
+
+logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt=DATEFMT)
+logger = logging.getLogger(__name__)
 
 
 class Language(object):
@@ -16,6 +24,7 @@ class Language(object):
 
     def __init__(self):
         self.iso3 = None
+        self.wals_code = None
         self.iso1 = None
         self.wikicode = None
         self.wikiname = None
@@ -27,17 +36,24 @@ class Language(object):
         self.alternate_names = set()
 
     def __repr__(self):
-        return "L:[" + " ".join(map(lambda i: str(i), [self.iso3, self.iso1, self.wikicode, self.wikiname])) + "]"
+        return "L:[" + " ".join(map(lambda i: str(i), [self.iso3, self.wals_code, self.wikicode, self.wikiname])) + "]"
 
 
-def loadLangs():
-
-    # data/wals
-
-
-
-    
-    pass
+def readFile(fname, sep="\s+"):
+    """
+    Given a filename, this reads the file. This ignores any line that starts with a #
+    and splits each line on tab. This is a very common use case.
+    :param: fname name of file.
+    :return: a list of lists, each list represents a line, and contains tab-separated elements.
+    """
+    out = []
+    with open(fname) as f:
+        for line in f:
+            if line.startswith("#"):
+                continue
+            sline = map(lambda s: s.strip(), re.split(sep, line))
+            out.append(sline)
+    return out
 
 
     

@@ -3,6 +3,11 @@ import os
 import codecs
 import utils
 from collections import defaultdict
+import utils
+import logging
+
+logging.basicConfig(level=logging.INFO, format=utils.FORMAT, datefmt=utils.DATEFMT)
+logger = logging.getLogger(__name__)
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -212,10 +217,10 @@ def getF1(lang1, lang2):
     """
 
     if len(lang1) == 0:
-        print "ERROR: first lang is empty or doesn't exist"
+        logger.error("first lang is empty or doesn't exist")
         return -1
     if len(lang2) == 0:
-        print "ERROR: second lang is empty or doesn't exist"
+        logger.error("second lang is empty or doesn't exist")
         return -1
 
     tp = len(lang2.intersection(lang1))
