@@ -7,7 +7,7 @@ Welcome to langsim's documentation!
 ===================================
 
 .. image:: https://readthedocs.org/projects/langsim/badge/?version=latest
-    :target: http://langsim.readthedocs.org/en/latest/?badge=latest
+    :target: http://langsim.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 langsim is a tool for use with WALS and Phoible for getting language similarity for different tasks.
@@ -33,12 +33,14 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-
+   
    langsim
    wals
    phoible
    uriel
    utils
+   wikidatastats
+
 
 
 

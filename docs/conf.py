@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.abspath('../src/langsim'))
 extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
-    'sphinx.ext.autodoc',
+    'sphinx.ext.autodoc'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
