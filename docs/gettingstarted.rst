@@ -20,10 +20,11 @@ Compressed
 Data
 -----
 
-This project depends on data from URIEL, WALS, and Phoible. The WALS and Phoible data are included (in the `data folder <https://github.com/mayhewsw/langsim/tree/master/src/langsim/data>`_`)
+This project depends on data from URIEL, WALS, and Phoible. The WALS and Phoible data are included (in the `data folder <https://github.com/mayhewsw/langsim/tree/master/src/langsim/data>`_)
 but the URIEL data is too large. Get it `here <http://www.cs.cmu.edu/~dmortens/downloads/uriel_v0_3_0.tar.xz>`_. Alternatively,
 run the following::
 
+    $ cd src/langsim/data/
     $ wget http://www.cs.cmu.edu/~dmortens/downloads/uriel_v0_3_0.tar.xz
     $ tar xvf uriel_v0_3_0.tar.xz
 

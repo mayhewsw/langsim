@@ -132,7 +132,8 @@ def getlangmap2to3():
 
     return two2three
 
-def cosinec(a,b):
+
+def cosine(a,b):
     """
     Cosine distance. This avoids having to install scipy.
 
