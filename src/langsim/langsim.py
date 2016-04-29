@@ -27,12 +27,23 @@ def sim_script(l1, l2):
 
 
 def sim_script_closest(l1):
+    """
+
+    :param l1: language name, wikiname?
+    :return: langdists, closest
+    """
     langdists = wikidatastats.loaddump()
     closest = wikidatastats.getclosest(l1, langdists)
     return langdists, closest
 
 
 def sim_gen(l1, l2):
+    """
+
+    :param l1:
+    :param l2:
+    :return:
+    """
     # get wals
     langs = wals.loadlangs()
     logger.debug(l2)
@@ -40,6 +51,11 @@ def sim_gen(l1, l2):
 
 
 def sim_gen_closest(l1):
+    """
+
+    :param l1:
+    :return:
+    """
     langs = wals.loadlangs()
     closest = wals.getclosest(l1)
     return langs, closest
@@ -60,6 +76,9 @@ def sim_phon(l1, l2):
 def sim_phon_closest(l1):
     """
     Should return a tuple: langs, closest.
+
+    :param l1:
+    :returns: ?
     """
     #langs = phoible.loadlangs()
     #closest = phoible.getclosest(l1, langs)
@@ -135,13 +154,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Interact with the LangSim databases.")
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--sim_overall", help="Get languages ordered by similarity to query", metavar="l1", nargs=1)
+    #group.add_argument("--sim_overall", help="Get languages ordered by similarity to query", metavar="l1", nargs=1)
     group.add_argument("--sim_overall_closest", help="Get languages ordered by similarity to query", metavar="l1", nargs=1)
     group.add_argument("--sim_gen", help="Get languages ordered by genealogical similarity", metavar=('l1', 'l2'), nargs=2)
     group.add_argument("--sim_gen_closest", help="Get languages ordered by genealogical similarity", metavar="l1", nargs='+')
     group.add_argument("--sim_script", help="Get the F1 score between l1 and l2", metavar=('l1', 'l2'), nargs='+')
     group.add_argument("--sim_phon", help="Get the Distinctive Feature score between l1 and l2", metavar=('l1', 'l2'), nargs='+')
-    parser.add_argument("--highresource", "-hr", help="only compare with high resource", action="store_true")
 
     args = parser.parse_args()
 

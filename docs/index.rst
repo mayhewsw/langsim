@@ -12,11 +12,6 @@ Welcome to langsim's documentation!
 
 langsim is a tool for use with WALS and Phoible for getting language similarity for different tasks.
 
-Features
-========
-
-Use this as a way to interact with URIEL, WALS, Phoible.
-
 
 Installation
 ============
@@ -32,14 +27,10 @@ Contents:
 =========
 
 .. toctree::
-   :maxdepth: 2
-   
-   langsim
-   wals
-   phoible
-   uriel
-   utils
-   wikidatastats
+
+   installation
+   usage
+   code
 
 
 

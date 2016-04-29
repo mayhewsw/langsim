@@ -1,5 +1,4 @@
 import os.path
-import pkgutil
 import logging
 import re
 
@@ -14,13 +13,27 @@ logger = logging.getLogger(__name__)
 
 class Language(object):
     """
-    Language class
+    Language class. Each language has:
+
+    * ISO639-1 code (e.g. tr)
+
+    * ISO639-3 code (e.g. cmn)
+
+    * wikipedia code (e.g. fr)
+
+    * wikipedia name (e.g. Waray-Waray)
+
+    * phoible data
+
+    * wals data
+
+    * script data
+
+    * character frequency data
+
+    * wikipedia file size
+
     """
-    # each language has: ISO639-1 code, ISO639-3 code, wikipedia code, wikipedia name,
-    # phoible data
-    # wals data
-    # script data
-    # wikipedia file size
 
     def __init__(self):
         self.iso3 = None
@@ -42,9 +55,10 @@ class Language(object):
 def readFile(fname, sep="\s+"):
     """
     Given a filename, this reads the file. This ignores any line that starts with a #
-    and splits each line on tab. This is a very common use case.
+    and splits each line on `sep`. This is a very common use case.
+
     :param: fname name of file.
-    :return: a list of lists, each list represents a line, and contains tab-separated elements.
+    :return: a list of lists, each list represents a line, and contains elements separated by `sep`.
     """
     out = []
     with open(fname) as f:
@@ -56,7 +70,6 @@ def readFile(fname, sep="\s+"):
     return out
 
 
-    
 def getmissingmap():
     """
     Get the map of languages missing from Phoible
@@ -74,9 +87,11 @@ def getmissingmap():
         m[missing] = target
     return m
 
+
 def getlangmap():
     """
     This produces a map from ISO 639-3 codes to ISO 639-1 codes. Sigh.
+
     :return:
     """
 
@@ -98,6 +113,7 @@ def getlangmap():
 def getlangmap2to3():
     """
     This produces a map from ISO 639-3 codes to ISO 639-1 codes. Sigh.
+
     :return:
     """
 

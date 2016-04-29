@@ -1,5 +1,5 @@
-WALS
-====
+wals.py
+=======
 
 This is a file that describes how the WALS module works.
 

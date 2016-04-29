@@ -18,15 +18,15 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 logging.basicConfig(level=logging.INFO, format=utils.FORMAT, datefmt=utils.DATEFMT)
 logger = logging.getLogger(__name__)
 
-class StaticStats:
-
-    def __init__(self):
-
-        langdists = loaddump()
-        self.langdists = langdists
-
 
 def getclosest(lang, langdists):
+    """
+    This calculates script similarities between `lang` and all other languages in `langdists`.
+
+    :param lang: 3-letter language code
+    :param langdists: output from :func:`wikidatastats.loaddump`
+    :return: a map of form {langcode : float, ...}
+    """
 
     three2two = utils.getlangmap()
     lang2 = three2two[lang]
@@ -48,9 +48,9 @@ def getclosest(lang, langdists):
 
 def loadnamemap():
     """
-    Produces a map from two letter code to wikipedia name
+    Produces a map from two letter code to wikipedia name. This reads `data/wikilanguages`.
 
-    :return:
+    :return: map of form {two letter code: wiki name, ...}
     """
     fname = os.path.join(__location__, "data/wikilanguages")
     code2name = {}
@@ -64,10 +64,14 @@ def loadnamemap():
 
 def compare(langid1, langid2, langdists):
     """
-    Get score for these two
+    Get script similarity between languages. This just retrieves :class:`utils.Language` objects that have
+    ISO codes of `langid1` and `langid2`, then calls :func:`simdist`.
 
-    :param langid1:
-    :param langid2:
+    If the languages are not present in `langdists`, then the returned score is -1.
+
+    :param langid1: 3-letter language code
+    :param langid2: 3-letter language code
+    :param langdists: output from :func:`wikidatastats.loaddump`
     :return: a score of script similarity
     """
 
@@ -92,8 +96,12 @@ def compare(langid1, langid2, langdists):
 
 def simdist(d1, d2):
     """
-    d1 and d2 are each dictionaries as {char:freq, ...}
-    This gives a similarity score between them.
+    This gives a similarity score between character distributions. These
+    character distributions are usually taken from the `charfreqs` field in :class:`utils.Language`
+
+    :param d1: map from {character : float, ...}
+    :param d2: map from {character : float, ...}
+    :returns: similarity score (float)
     """
 
     d1norm = math.sqrt(sum(map(lambda v: math.pow(v,2), d1.values())))
@@ -116,10 +124,15 @@ def simdist(d1, d2):
 
 def countscripts(langdists):
     """
-    This counts the number of scripts in the data.
+    This counts the number of scripts in the data. This is a convenience method
+    meant to be run from the command line. It prints the results.
 
-    :param langdists:
-    :return:
+    The method is a bottom-up clustering. For each new language, it uses :func:`simdist`
+    to get a similarity score between all previous clusters. If all scores are below a threshold
+    (arbitrarily set at 0.5), then it starts a new cluster. Otherwise this language joins
+    the best cluster.
+
+    :param langdists: output from :func:`wikidatastats.loaddump`
     """
     # a list of dictionaries
     scripts = []
@@ -137,6 +150,7 @@ def countscripts(langdists):
         # script is a dictionary
         for script in scripts:
 
+            # just compare against the first.
             langcode2 = script.keys()[0]
             langobj2 = langdists[langcode2]
             d2 = langobj2.charfreqs
@@ -186,11 +200,12 @@ def listsizes(limit=0):
         print c,l.wikiname, l.wikisize
         
 
-def makedump(mypath):
+def makedump(mypath, outname="data/wikilanguages.pkl"):
     """
-    This collects and dumps information about every wikidata file.
+    This collects and dumps information about every wikidata file. The name of the
+    output file is
 
-    :param mypath is the path to the wikidata/ folder.
+    :param mypath: is the path to the wikidata/ folder.
     """
     
     onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
@@ -232,25 +247,32 @@ def makedump(mypath):
             lang.charfreqs = charfreqs
             langdists[lang.wikicode] = lang
                         
-    with open("wikilanguages.pkl", "wb") as f:
+    with open(outname, "wb") as f:
         pickle.dump(langdists, f)
 
 
-def loaddump():
-    fname = os.path.join(__location__, "data/wikilanguages.pkl")
+def loaddump(dumpname="data/wikilanguages.pkl"):
+    """
+    This loads a pickle file which has been previously created using :func:`wikidatastats.makedump`.
+    Most importantly, the returned :class:`utils.Language` object has the `charfreqs` field set.
 
-    f = open(fname)
-    langdists = pickle.load(f)
-    f.close()
+    :param dumpname: name of the pickle file to load from.
+    :return: a map of form {wikiname : :class:`utils.Language`, ...}
+    """
+    fname = os.path.join(__location__, dumpname)
+
+    with open(fname) as f:
+        langdists = pickle.load(f)
+
     return langdists
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     g = parser.add_mutually_exclusive_group(required=True)
-    g.add_argument("--listsizes", help="Print a sorted list of file sizes")
-    g.add_argument("--getclosest", help="Compare LANG against all others", nargs=1)
-    g.add_argument("--compare", help="Compare LANG1 against LANG2", nargs=2)
+    g.add_argument("--listsizes", "-l", help="Print a sorted list of file sizes, include only files with size > LIMIT", metavar="LIMIT", nargs=1, default=0)
+    g.add_argument("--getclosest", help="Compare LANG against all others", metavar="LANG", nargs=1)
+    g.add_argument("--compare", help="Compare L1 against L2", metavar=("L1", "L2"), nargs=2)
     g.add_argument("--countscripts", help="Get a grouping of scripts", action="store_true")
     g.add_argument("--makedump", help="Create the dump", nargs=1)
     
@@ -264,14 +286,10 @@ if __name__ == "__main__":
     elif args.countscripts:        
         countscripts(langdists)
     elif args.listsizes:
-        listsizes(args.listsizes)
+        limit = args.listsizes[0]
+        listsizes(limit)
     elif args.compare:
         print args.compare
-        # why are first and second
-        #d1 = langdists["wikidata." + args.compare[0]]
-        #d2 = langdists["wikidata." + args.compare[1]]
-
-        #print simdist(d1, d2)
 
         print compare(args.compare[0], args.compare[1], langdists)
     elif args.makedump:
@@ -280,7 +298,4 @@ if __name__ == "__main__":
     else:
         print "Whoops... argparse shouldn't let you get here"
         
-        
 
-
-    
