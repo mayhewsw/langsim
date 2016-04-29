@@ -1,6 +1,7 @@
 import os.path
 import logging
 import re
+from numpy.linalg import norm
 
 __location__ = os.path.dirname(os.path.realpath(__file__))
 
@@ -130,3 +131,18 @@ def getlangmap2to3():
                 two2three[twoletter] = sline[0]
 
     return two2three
+
+def cosinec(a,b):
+    """
+    Cosine distance. This avoids having to install scipy.
+
+    :param a: a numpy vector
+    :param b: a numpy vector
+    :return: the cosine distance between these vectors.
+    """
+
+    num = a.dot(b)
+    denom = norm(a) * norm(b)
+
+    return 1 - num/denom
+

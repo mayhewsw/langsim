@@ -10,17 +10,15 @@ Welcome to langsim's documentation!
     :target: http://langsim.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-langsim is a tool for use with WALS and Phoible for getting language similarity for different tasks.
+langsim is a tool for use with URIEL, WALS, and Phoible for getting language similarity for different tasks.
 
 
-Installation
+Download
 ============
 
-Installation is very simple::
+This library is intended to be used as a set of scripts, and not necessary installed. To get it from Github, do::
 
     $ git clone https://github.com/mayhewsw/langsim
-    $ cd langsim
-    $ python setup.py install
 
 
 Contents:
@@ -28,7 +26,7 @@ Contents:
 
 .. toctree::
 
-   installation
+   gettingstarted
    usage
    code
 

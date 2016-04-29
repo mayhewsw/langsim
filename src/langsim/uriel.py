@@ -10,6 +10,8 @@ logging.basicConfig(level=logging.INFO, format=utils.FORMAT, datefmt=utils.DATEF
 logger = logging.getLogger(__name__)
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+# Set uriel path here.
 urielfolder = os.path.join(__location__, "data/uriel_v0_3_0/")
 
 

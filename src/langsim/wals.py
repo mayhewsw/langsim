@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO, format=utils.FORMAT, datefmt=utils.DATEF
 logger = logging.getLogger(__name__)
 
 # Phonology index range (strict python indexing)
-from scipy.spatial.distance import cosine
+
 
 PHON_INDS = (0,19)
 
@@ -124,7 +124,7 @@ def getphonsim(l1, l2):
     t = l2.phon_feats()
 
     # this would be the best method, but we have to deal with missing values.
-    #dist = cosine(tgtf, t)
+    #dist = utils.cosine(tgtf, t)
 
     # number of elements where they are equal
     numequal = sum(np.equal(tgtf, t))
@@ -210,7 +210,7 @@ def compare(lang1, lang2):
     l1, l2 = comparefeats(lang1, lang2)
 
     if l1 and l2:
-        return cosine(l1.phon_feats(),l2.phon_feats())
+        return utils.cosine(l1.phon_feats(),l2.phon_feats())
     else:
         print "One or both langs not found: {0}, {1}".format(l1, l2)
         return -1

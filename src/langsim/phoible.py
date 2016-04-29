@@ -1,4 +1,3 @@
-from scipy.spatial.distance import cosine
 import os
 import codecs
 import utils
@@ -298,7 +297,7 @@ def getdistinctivefeatures(lang1, lang2, phonemeMap):
                 if ps in phonedist:
                     sim = phonedist[ps]
                 else:
-                    sim = 1-cosine(phonemeMap[pu1], phonemeMap[pu2])
+                    sim = 1-utils.cosine(phonemeMap[pu1], phonemeMap[pu2])
                     phonedist[ps] = sim
             else:
                 # not there...?
