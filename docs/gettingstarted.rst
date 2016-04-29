@@ -34,9 +34,8 @@ data/ folder, but this is up to you.
 Dependencies
 ------------
 
-This depends on numpy and scipy::
+This depends on numpy::
 
     $ pip install numpy
-    $ pip install scipy
 
 
